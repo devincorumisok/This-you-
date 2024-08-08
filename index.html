@@ -7,48 +7,47 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="background">
-        <div class="overlay">
-            <div class="message">
-                <span>Loading...</span>
-            </div>
-        </div>
+    <div class="background"></div>
+    <div class="overlay">
+        <div class="title">This You?</div>
+        <div class="message">Locating...</div>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-                        const apiKey = '453d8c5ab0a64d3c86b26a8f044cdeea'; // Your Geoapify API key
-                        const geoapifyUrl = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${apiKey}`;
-                        
-                        var requestOptions = {
-                          method: 'GET',
-                        };
+            // Check if geolocation is available
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(success, error);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
 
-                        fetch(geoapifyUrl, requestOptions)
-                            .then(response => response.json())
-                            .then(result => {
-                                console.log(result); // Debug: Check the result in the console
-                                const mapsUrl = `https://www.google.com/maps/?q=${lat},${lon}`;
-                                window.location.href = mapsUrl;
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                const mapsUrl = `https://www.google.com/maps/?q=${lat},${lon}`;
-                                window.location.href = mapsUrl;
-                            });
-                    }, function() {
-                        alert('Unable to retrieve your location.');
-                        window.location.href = 'https://www.google.com/maps';
+            function success(position) {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                
+                fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=453d8c5ab0a64d3c86b26a8f044cdeea`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const location = data.features[0];
+                        const address = location.properties.formatted;
+                        const streetViewUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+                        const isStreetViewAvailable = location.properties.streetView;
+
+                        if (isStreetViewAvailable) {
+                            window.location.href = `https://www.google.com/maps/@${latitude},${longitude},3a,75y,350h,90t/data=!3m8!1e1!3m6!1s${streetViewUrl}`;
+                        } else {
+                            window.location.href = streetViewUrl;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while fetching your location.');
                     });
-                } else {
-                    alert('Geolocation is not supported by this browser.');
-                    window.location.href = 'https://www.google.com/maps';
-                }
-            }, 1000); // Delay redirection by 1 second
+            }
+
+            function error() {
+                alert("Unable to retrieve your location.");
+            }
         });
     </script>
 </body>
