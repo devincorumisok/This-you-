@@ -12,43 +12,6 @@
         <div class="title">This You?</div>
         <div class="message">Locating...</div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if geolocation is available
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(success, error);
-            } else {
-                alert("Geolocation is not supported by this browser.");
-            }
-
-            function success(position) {
-                const latitude = position.coords.latitude;
-                const longitude = position.coords.longitude;
-                
-                fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=453d8c5ab0a64d3c86b26a8f044cdeea`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const location = data.features[0];
-                        const address = location.properties.formatted;
-                        const streetViewUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-                        const isStreetViewAvailable = location.properties.streetView;
-
-                        if (isStreetViewAvailable) {
-                            window.location.href = `https://www.google.com/maps/@${latitude},${longitude},3a,75y,350h,90t/data=!3m8!1e1!3m6!1s${streetViewUrl}`;
-                        } else {
-                            window.location.href = streetViewUrl;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while fetching your location.');
-                    });
-            }
-
-            function error() {
-                alert("Unable to retrieve your location.");
-            }
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
