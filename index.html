@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>This You?</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background">
+        <div class="overlay">
+            <div class="message">
+                <span>Loading...</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        const apiKey = '453d8c5ab0a64d3c86b26a8f044cdeea'; // Your Geoapify API key
+                        const geoapifyUrl = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${apiKey}`;
+                        
+                        var requestOptions = {
+                          method: 'GET',
+                        };
+
+                        fetch(geoapifyUrl, requestOptions)
+                            .then(response => response.json())
+                            .then(result => {
+                                console.log(result); // Debug: Check the result in the console
+                                const mapsUrl = `https://www.google.com/maps/?q=${lat},${lon}`;
+                                window.location.href = mapsUrl;
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                const mapsUrl = `https://www.google.com/maps/?q=${lat},${lon}`;
+                                window.location.href = mapsUrl;
+                            });
+                    }, function() {
+                        alert('Unable to retrieve your location.');
+                        window.location.href = 'https://www.google.com/maps';
+                    });
+                } else {
+                    alert('Geolocation is not supported by this browser.');
+                    window.location.href = 'https://www.google.com/maps';
+                }
+            }, 1000); // Delay redirection by 1 second
+        });
+    </script>
+</body>
+</html>
